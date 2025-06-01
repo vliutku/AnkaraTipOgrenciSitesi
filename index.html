@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Not Hesaplayıcı Seçimi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * {
       margin: 0;
@@ -20,6 +21,7 @@
       align-items: center;
       position: relative;
       overflow: hidden;
+      padding: 20px;
     }
 
     body::before {
@@ -33,6 +35,7 @@
                   radial-gradient(circle at 80% 20%, rgba(166, 50, 75, 0.08) 0%, transparent 50%),
                   radial-gradient(circle at 40% 40%, rgba(166, 50, 75, 0.05) 0%, transparent 50%);
       animation: float 20s ease-in-out infinite;
+      z-index: 0;
     }
 
     @keyframes float {
@@ -45,19 +48,19 @@
       text-align: center;
       z-index: 2;
       position: relative;
-      padding: 40px;
+      padding: 30px;
       background: rgba(255, 255, 255, 0.02);
       backdrop-filter: blur(10px);
       border-radius: 20px;
       border: 1px solid rgba(166, 50, 75, 0.2);
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-      max-width: 600px;
-      width: 90%;
+      width: 100%;
+      max-width: 500px;
     }
 
     h1 {
-      font-size: 2.5rem;
-      margin-bottom: 20px;
+      font-size: 2rem;
+      margin-bottom: 16px;
       background: linear-gradient(135deg, #a6324b 0%, #d4556b 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -74,34 +77,35 @@
 
     .subtitle {
       color: rgba(255, 255, 255, 0.8);
-      font-size: 1.1rem;
-      margin-bottom: 40px;
+      font-size: 1rem;
+      margin-bottom: 30px;
       font-weight: 300;
     }
 
     .buttons-container {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 15px;
       align-items: center;
     }
 
     .button {
-      position: relative;
-      padding: 20px 50px;
-      font-size: 1.3rem;
+      padding: 16px 24px;
+      font-size: 1.1rem;
       font-weight: 600;
       border: none;
-      border-radius: 15px;
+      border-radius: 12px;
       background: linear-gradient(135deg, #a6324b 0%, #8e2a3f 100%);
       color: white;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 8px 25px rgba(166, 50, 75, 0.3);
-      overflow: hidden;
-      min-width: 200px;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(166, 50, 75, 0.3);
+      width: 100%;
+      max-width: 300px;
       text-transform: uppercase;
       letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
     }
 
     .button::before {
@@ -120,18 +124,18 @@
     }
 
     .button:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 15px 35px rgba(166, 50, 75, 0.4);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 10px 30px rgba(166, 50, 75, 0.4);
       background: linear-gradient(135deg, #b5374f 0%, #9b2e44 100%);
     }
 
     .button:active {
-      transform: translateY(-1px) scale(1.02);
-      box-shadow: 0 5px 15px rgba(166, 50, 75, 0.3);
+      transform: translateY(0) scale(1);
+      box-shadow: 0 4px 12px rgba(166, 50, 75, 0.3);
     }
 
     .logo-container {
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       animation: pulse 2s ease-in-out infinite;
     }
 
@@ -141,41 +145,24 @@
     }
 
     .logo-container img {
-      width: 120px;
+      width: 100px;
       height: auto;
       border-radius: 50%;
       box-shadow: 0 10px 30px rgba(166, 50, 75, 0.3);
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 400px) {
       h1 {
-        font-size: 2rem;
-      }
-
-      .button {
-        font-size: 1.1rem;
-        padding: 18px 40px;
-        min-width: 180px;
-      }
-
-      .container {
-        padding: 30px 20px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
       }
 
       .subtitle {
-        font-size: 1rem;
+        font-size: 0.95rem;
       }
 
       .button {
         font-size: 1rem;
-        padding: 16px 35px;
-        min-width: 160px;
+        padding: 14px 20px;
       }
     }
   </style>
@@ -185,19 +172,12 @@
     <div class="logo-container">
       <img src="logo.png" alt="Ankara Tıp Logosu" />
     </div>
-
     <h1>Ankara Tıp Fakültesi</h1>
     <p class="subtitle">Hangi dönemi hesaplamak istiyorsun?</p>
-
     <div class="buttons-container">
-      <button class="button" onclick="location.href='donem1.html'">
-        Dönem 1
-      </button>
-      <button class="button" onclick="location.href='donem2.html'">
-        Dönem 2
-      </button>
+      <button class="button" onclick="location.href='donem1.html'">Dönem 1</button>
+      <button class="button" onclick="location.href='donem2.html'">Dönem 2</button>
     </div>
   </div>
 </body>
 </html>
-
