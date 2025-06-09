@@ -7,8 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
-/* ——— tema, tablo, buton vs. (Dönem 2 dosyandaki CSS’in aynısı) ——— */
-input[type="text"], input[type="number"]{padding:4px 8px;border:1px solid;border-radius:5px;box-sizing:border-box;transition:border-color .2s,box-shadow .2s}
+/* ——— tema, tablo, buton vb. ——— */
+input[type="text"],input[type="number"]{padding:4px 8px;border:1px solid;border-radius:5px;box-sizing:border-box;transition:border-color .2s,box-shadow .2s}
 #targetScore{width:200px}
 table td input[type="text"],table td input[type="number"]{width:70px}
 input[type="text"]:focus,input[type="number"]:focus{outline:none;border-color:var(--button-bg);box-shadow:0 0 0 2px rgba(127,29,29,.3)}
@@ -65,7 +65,8 @@ table{border:none;background:none;border-radius:0}
 </table>
 </div>
 
-<p>Not: Final sınavından <b>50’nin altında</b> alırsan doğrudan kalırsın.</p>
+<p><b>Final, Aile İzlenimi, NYKS, KDT Sözlü Sunumu ve KDT Proje Sunumu</b> notlarının
+düz ortalaması <b>50’nin altındaysa</b> doğrudan kalırsın.</p>
 
 <div class="save-load-buttons">
 <button onclick="saveGrades()">Notları Kaydet</button>
@@ -81,7 +82,7 @@ table{border:none;background:none;border-radius:0}
 <div id="status"></div>
 
 <script>
-// ——— Dönem 3 bileşenleri ———
+// ---------- Dönem 3 bileşenleri ----------
 const components = [
   ["M1", 4.66], ["M2", 4.66], ["M3", 4.66],
   ["M4", 4.66], ["M5", 4.66], ["M6", 4.66],
@@ -92,25 +93,27 @@ const components = [
   ["Final", 45]
 ];
 
-const tbody = document.getElementById("table-body");
-const finalIndex = components.findIndex(c => c[0] === "Final");
+// Kural gereği ortalaması kontrol edilen 5 sınav:
+const mustAvgNames = ["Final","Aile İzlenimi","NYKS","KDT Sözlü Sunumu","KDT Proje Sunumu"];
 
-// tabloyu doldur
+const tbody = document.getElementById("table-body");
 components.forEach(([name, weight], i) => {
   const row = document.createElement("tr");
-  row.innerHTML = `<td>${name}</td><td>${weight}</td>
-    <td><input type="text" id="score-${i}" min="0" max="100" step="0.1"
-      inputmode="decimal" oninput="validateRange(this)"
-      onkeydown="handleKey(event, ${i})"></td>`;
+  row.innerHTML =
+    `<td>${name}</td><td>${weight}</td>
+     <td><input type="text" id="score-${i}" min="0" max="100" step="0.1"
+        inputmode="decimal" oninput="validateRange(this)"
+        onkeydown="handleKey(event, ${i})"></td>`;
   tbody.appendChild(row);
 });
 
-// ——— yardımcı fonksiyonlar (Dönem 2 kodundan kopya) ———
+/* ------------- Ortak yardımcı işlevler ------------- */
 function hideResultsSections(){
   ["result","progressWrapper","status"].forEach(id=>{
     const el=document.getElementById(id);
     el.style.opacity="0";el.style.transform="translateY(20px)";
-    el.style.pointerEvents="none";setTimeout(()=>{el.style.visibility="hidden"},500);
+    el.style.pointerEvents="none";
+    setTimeout(()=>{el.style.visibility="hidden"},500);
   });
   document.getElementById("status").innerHTML="";
 }
@@ -125,7 +128,8 @@ function alertMessage(msg,type){
   },3000);
 }
 function saveGrades(){
-  const grades={};components.forEach((_,i)=>{grades[`score-${i}`]=document.getElementById(`score-${i}`).value});
+  const grades={};
+  components.forEach((_,i)=>{grades[`score-${i}`]=document.getElementById(`score-${i}`).value});
   grades.targetScore=document.getElementById('targetScore').value;
   localStorage.setItem('ankaraTipNotlari_D3',JSON.stringify(grades));
   alertMessage("Notlarınız kaydedildi!","success");
@@ -135,7 +139,8 @@ function loadGrades(){
   if(!saved){alertMessage("Kaydedilmiş not bulunamadı.","warning");return;}
   const grades=JSON.parse(saved);
   components.forEach((_,i)=>{
-    const inp=document.getElementById(`score-${i}`);if(inp&&grades[`score-${i}`]!=undefined)inp.value=grades[`score-${i}`];
+    const inp=document.getElementById(`score-${i}`);
+    if(inp&&grades[`score-${i}`]!==undefined)inp.value=grades[`score-${i}`];
   });
   if(grades.targetScore!==undefined)document.getElementById('targetScore').value=grades.targetScore;
   calculate();alertMessage("Notlarınız yüklendi!","info");
@@ -146,23 +151,34 @@ function resetGrades(){
   hideResultsSections();alertMessage("Tüm notlar sıfırlandı!","info");
 }
 
-// ——— ana hesaplama ———
+/* ------------- Hesaplama ------------- */
 function calculate(){
   ["result","progressWrapper","status"].forEach(id=>{
     const el=document.getElementById(id);
-    el.style.visibility="visible";el.style.opacity="1";el.style.transform="translateY(0)";
-    el.style.pointerEvents="auto";
+    el.style.visibility="visible";el.style.opacity="1";
+    el.style.transform="translateY(0)";el.style.pointerEvents="auto";
   });
 
-  const finalRaw=document.getElementById(`score-${finalIndex}`).value.trim();
-  const finalScore=parseFloat(finalRaw)||0;
+  /* — 1. Kural: 5 sınav ortalaması — */
+  let mustTotal=0, mustCount=0, missingMust=false;
+  components.forEach(([name],i)=>{
+    if(mustAvgNames.includes(name)){
+      const raw=document.getElementById(`score-${i}`).value.trim();
+      if(raw==="") missingMust=true;          // eksik varsa şimdilik ertele
+      mustTotal+=parseFloat(raw)||0;
+      mustCount++;
+    }
+  });
+  const mustAvg=mustTotal/mustCount;
 
-  // final <50 ise direkt kal
-  if(finalRaw!=="" && finalScore<50){
-    document.getElementById("result").innerHTML="Kaldınız (final < 50)";
-    document.getElementById("result").style.color=getComputedStyle(document.documentElement).getPropertyValue('--progress-red');
+  if(!missingMust && mustAvg<50){
+    document.getElementById("result").innerHTML=
+      `Kaldınız (beşli ortalama ${mustAvg.toFixed(2)})`;
+    document.getElementById("result").style.color=
+      getComputedStyle(document.documentElement).getPropertyValue('--progress-red');
     const statusDiv=document.getElementById("status");
-    statusDiv.innerHTML="<div class='fail'><i class='fas fa-times-circle'></i> Maalesef kaldınız</div>";
+    statusDiv.innerHTML=
+      "<div class='fail'><i class='fas fa-times-circle'></i> Maalesef kaldınız</div>";
     document.getElementById("progressWrapper").style.opacity="0";
     document.getElementById("progressWrapper").style.transform="translateY(20px)";
     document.getElementById("progressWrapper").style.pointerEvents="none";
@@ -170,15 +186,16 @@ function calculate(){
     return;
   }
 
+  /* — 2. Genel katkı / hedef hesabı — */
   let target=parseInt(document.getElementById("targetScore").value);
   if(isNaN(target)||target<60)target=60;if(target>100)target=100;
 
   let total=0, remaining=0;
-  components.forEach(([name,w],i)=>{
+  components.forEach(([_,w],i)=>{
     const raw=document.getElementById(`score-${i}`).value;
     const val=parseFloat(raw);
     const score=isNaN(val)?0:val;
-    const contrib=(score*w/100);
+    const contrib=score*w/100;
     if(!isNaN(val)&&raw.trim()!=="")total+=contrib;else remaining+=w;
   });
 
@@ -186,12 +203,12 @@ function calculate(){
   const neededAvg=remaining>0?(need/remaining)*100:0;
 
   document.getElementById("result").innerHTML=
-  `✅ Şu ana kadar puan: <b>${total.toFixed(2)}</b><br>
-   🎯 Hedef not: <b>${target}</b><br>
-   ❗ Kalan puan: <b>${need.toFixed(2)}</b><br>
-   📊 Kalan tüm sınavlarda gereken ort.: <b>${neededAvg.toFixed(2)}</b>`;
+    `✅ Şu ana kadar puan: <b>${total.toFixed(2)}</b><br>
+     🎯 Hedef not: <b>${target}</b><br>
+     ❗ Kalan puan: <b>${need.toFixed(2)}</b><br>
+     📊 Kalan sınav ort.: <b>${neededAvg.toFixed(2)}</b>`;
 
-  // progress
+  /* — 3. İlerleme çubuğu & durum — */
   const progress=Math.min((total/target)*100,100);
   const bar=document.getElementById("progressBar");
   bar.style.width=progress+"%";
@@ -216,13 +233,16 @@ function calculate(){
   }
 }
 
-// ——— klavye, tema, validasyon vs. ———
+/* --------- Diğer yardımcılar --------- */
 function handleKey(e,i){
-  if(e.key==="Enter"){e.preventDefault();const nxt=document.getElementById(`score-${i+1}`);nxt?nxt.focus():calculate();}
+  if(e.key==="Enter"){e.preventDefault();
+    const nxt=document.getElementById(`score-${i+1}`);
+    nxt?nxt.focus():calculate();}
 }
 function toggleDark(){
   document.body.classList.toggle("dark");
-  document.getElementById("themeToggle").textContent=document.body.classList.contains("dark")?"Aydınlık Tema":"Karanlık Tema";
+  document.getElementById("themeToggle").textContent=
+    document.body.classList.contains("dark")?"Aydınlık Tema":"Karanlık Tema";
 }
 function validateRange(inp){
   inp.value=inp.value.replace(/,/g,".").replace(/[^0-9.]/g,"");
