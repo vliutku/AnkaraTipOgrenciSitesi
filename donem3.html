@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Ankara Tıp Not Hesaplayıcısı – Dönem 3</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+/* ——— tema, tablo, buton vs. (Dönem 2 dosyandaki CSS’in aynısı) ——— */
+input[type="text"], input[type="number"]{padding:4px 8px;border:1px solid;border-radius:5px;box-sizing:border-box;transition:border-color .2s,box-shadow .2s}
+#targetScore{width:200px}
+table td input[type="text"],table td input[type="number"]{width:70px}
+input[type="text"]:focus,input[type="number"]:focus{outline:none;border-color:var(--button-bg);box-shadow:0 0 0 2px rgba(127,29,29,.3)}
+body.dark input[type="text"]:focus,body.dark input[type="number"]:focus{border-color:var(--button-bg);box-shadow:0 0 0 2px rgba(155,44,44,.5)}
+body.dark input[type="text"],body.dark input[type="number"]{background:#2e2e2e;color:#fff;border-color:#777}
+body:not(.dark) input[type="text"],body:not(.dark) input[type="number"]{background:#f2f2f2;color:#000;border-color:#ccc}
+:root{--bg:#f9f9f9;--text:#000;--table-bg:#fff;--border:#ccc;--button-bg:#7f1d1d;--button-bg-dark:#9b2c2c;--button-gradient-start:#991b1b;--button-gradient-end:#7f1d1d;--progress-red:#dc2626;--progress-yellow:#f59e0b;--progress-green:#16a34a;--header-bg:#7f1d1d}
+body.dark{--bg:#121212;--text:#fff;--table-bg:#1e1e1e;--border:#444;--button-bg:var(--button-bg-dark);--button-gradient-start:#b93c3c;--button-gradient-end:#9b2c2c;--header-bg:#5c1616}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);margin:0;padding:20px;max-width:600px;margin-left:auto;margin-right:auto;box-sizing:border-box}
+.logo{display:block;margin:0 auto 10px;width:120px;max-width:100%;height:auto;border-radius:8px}
+h1,h2{font-family:'Montserrat',sans-serif;font-weight:700;text-align:center;margin-bottom:20px;color:var(--text)}
+h1{font-size:24px}h2{font-size:20px}
+.controls{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:20px}
+input[type="number"],select{padding:8px;font-size:16px;max-width:100%;background:var(--table-bg);color:var(--text);border:1px solid var(--border);border-radius:4px;box-sizing:border-box}
+thead tr th{background:var(--header-bg);color:#fff;border-radius:4px 4px 0 0}
+table{border-collapse:collapse;width:100%;background:var(--table-bg);min-width:320px}
+th,td{border:1px solid var(--border);padding:10px;text-align:left;font-size:15px}
+button{width:100%;padding:12px;font-size:16px;margin-top:20px;background:linear-gradient(to bottom,var(--button-gradient-start),var(--button-gradient-end));color:#fff;border:none;border-radius:8px;cursor:pointer;transition:background .3s,transform .1s,box-shadow .3s;box-shadow:0 4px 6px rgba(0,0,0,.1)}
+button:hover{box-shadow:0 6px 10px rgba(0,0,0,.2)}
+button:active{transform:translateY(1px);box-shadow:0 2px 4px rgba(0,0,0,.15)}
+.result{margin-top:25px;font-weight:bold;font-size:16px;text-align:center;line-height:1.6;background:var(--table-bg);padding:15px;border-radius:8px;border:1px solid var(--border);opacity:0;visibility:hidden;transform:translateY(20px);transition:.5s}
+.pass,.fail{font-size:20px;margin-top:15px;text-align:center}
+.pass{color:var(--progress-green)}.fail{color:var(--progress-red)}.pass i,.fail i{margin-right:8px}
+.toggle{background:none;border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:5px;cursor:pointer;width:auto;box-shadow:none}
+.toggle:hover{background:rgba(0,0,0,.05)}body.dark .toggle:hover{background:rgba(255,255,255,.1)}
+.progress-container{width:100%;background:#ddd;border-radius:10px;margin-top:25px;height:25px;overflow:hidden;border:1px solid var(--border);opacity:0;visibility:hidden;transform:translateY(20px);transition:.5s}
+.progress-bar{height:100%;text-align:center;line-height:25px;font-weight:bold;color:#fff;border-radius:10px;transition:width .5s,background-color .5s}
+p{font-size:.8rem;color:gray;margin-top:10px;line-height:1.4}
+@media(max-width:480px){body{padding:15px}h1{font-size:20px}h2{font-size:18px}th,td{padding:8px;font-size:14px}input[type="text"],input[type="number"]{width:100%}table td input[type="text"],table td input[type="number"]{width:55px}button{padding:10px;font-size:15px}.controls button{width:auto;padding:8px 12px}}
+.save-load-buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;width:100%;justify-content:center}
+.save-load-buttons button{width:auto;flex-grow:1;padding:10px;margin-top:0;font-size:15px;background:linear-gradient(to bottom,var(--button-gradient-start),var(--button-gradient-end))}
+.table-responsive-wrapper{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;border:1px solid var(--border);background:var(--table-bg)}
+table{border:none;background:none;border-radius:0}
+</style>
+</head>
+<body>
+<div style="position:absolute;top:8px;left:12px;font-size:12px;color:gray;opacity:.7;">Haziran 2025</div>
+<div style="position:absolute;top:8px;right:12px;font-size:12px;color:gray;opacity:.7;">Ali U.</div>
+
+<img src="image.png" class="logo" alt="Ankara Tıp Logosu" />
+<h1>Ankara Tıp Not Hesaplayıcısı – Dönem 3</h1>
+
+<div class="controls">
+<label>Hedef Not:
+<input id="targetScore" type="text" value="60" inputmode="numeric" onblur="validateTarget(this)" placeholder="60–100 arası tam sayı">
+</label>
+<button class="toggle" onclick="toggleDark()" id="themeToggle">Karanlık Tema</button>
+</div>
+
+<div class="table-responsive-wrapper">
+<table>
+<thead><tr><th>Sınav</th><th>Ağırlık (%)</th><th>Notun</th></tr></thead>
+<tbody id="table-body"></tbody>
+</table>
+</div>
+
+<p>Not: Final sınavından <b>50’nin altında</b> alırsan doğrudan kalırsın.</p>
+
+<div class="save-load-buttons">
+<button onclick="saveGrades()">Notları Kaydet</button>
+<button onclick="loadGrades()">Notları Yükle</button>
+<button onclick="resetGrades()">Sıfırla</button>
+</div>
+
+<button onclick="calculate()">Hesapla</button>
+<div class="result" id="result"></div>
+<div id="progressWrapper" class="progress-container">
+  <div id="progressBar" class="progress-bar">0%</div>
+</div>
+<div id="status"></div>
+
+<script>
+// ——— Dönem 3 bileşenleri ———
+const components = [
+  ["M1", 4.66], ["M2", 4.66], ["M3", 4.66],
+  ["M4", 4.66], ["M5", 4.66], ["M6", 4.66],
+  ["NYUS (M1-2-3)", 2], ["NYUS (M4-5-6)", 2],
+  ["PDÖ", 4], ["İletişim", 2], ["KDT Proje Sunumu", 2],
+  ["NYKS", 9], ["KDT Sözlü Sunumu", 3], ["Aile İzlenimi", 3],
+  ["Gelişim Sınavı", 5],
+  ["Final", 45]
+];
+
+const tbody = document.getElementById("table-body");
+const finalIndex = components.findIndex(c => c[0] === "Final");
+
+// tabloyu doldur
+components.forEach(([name, weight], i) => {
+  const row = document.createElement("tr");
+  row.innerHTML = `<td>${name}</td><td>${weight}</td>
+    <td><input type="text" id="score-${i}" min="0" max="100" step="0.1"
+      inputmode="decimal" oninput="validateRange(this)"
+      onkeydown="handleKey(event, ${i})"></td>`;
+  tbody.appendChild(row);
+});
+
+// ——— yardımcı fonksiyonlar (Dönem 2 kodundan kopya) ———
+function hideResultsSections(){
+  ["result","progressWrapper","status"].forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.opacity="0";el.style.transform="translateY(20px)";
+    el.style.pointerEvents="none";setTimeout(()=>{el.style.visibility="hidden"},500);
+  });
+  document.getElementById("status").innerHTML="";
+}
+function alertMessage(msg,type){
+  const div=document.getElementById("result");
+  div.style.visibility="visible";div.style.opacity="1";div.style.transform="translateY(0)";
+  div.innerHTML=msg;div.style.color="";
+  if(type==="success")div.style.color=getComputedStyle(document.documentElement).getPropertyValue('--progress-green');
+  if(type==="warning")div.style.color=getComputedStyle(document.documentElement).getPropertyValue('--progress-yellow');
+  setTimeout(()=>{div.style.opacity="0";div.style.transform="translateY(20px)";
+    setTimeout(()=>{div.innerHTML="";div.style.visibility="hidden"},500);
+  },3000);
+}
+function saveGrades(){
+  const grades={};components.forEach((_,i)=>{grades[`score-${i}`]=document.getElementById(`score-${i}`).value});
+  grades.targetScore=document.getElementById('targetScore').value;
+  localStorage.setItem('ankaraTipNotlari_D3',JSON.stringify(grades));
+  alertMessage("Notlarınız kaydedildi!","success");
+}
+function loadGrades(){
+  const saved=localStorage.getItem('ankaraTipNotlari_D3');
+  if(!saved){alertMessage("Kaydedilmiş not bulunamadı.","warning");return;}
+  const grades=JSON.parse(saved);
+  components.forEach((_,i)=>{
+    const inp=document.getElementById(`score-${i}`);if(inp&&grades[`score-${i}`]!=undefined)inp.value=grades[`score-${i}`];
+  });
+  if(grades.targetScore!==undefined)document.getElementById('targetScore').value=grades.targetScore;
+  calculate();alertMessage("Notlarınız yüklendi!","info");
+}
+function resetGrades(){
+  components.forEach((_,i)=>{document.getElementById(`score-${i}`).value=""});
+  document.getElementById('targetScore').value="60";
+  hideResultsSections();alertMessage("Tüm notlar sıfırlandı!","info");
+}
+
+// ——— ana hesaplama ———
+function calculate(){
+  ["result","progressWrapper","status"].forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.visibility="visible";el.style.opacity="1";el.style.transform="translateY(0)";
+    el.style.pointerEvents="auto";
+  });
+
+  const finalRaw=document.getElementById(`score-${finalIndex}`).value.trim();
+  const finalScore=parseFloat(finalRaw)||0;
+
+  // final <50 ise direkt kal
+  if(finalRaw!=="" && finalScore<50){
+    document.getElementById("result").innerHTML="Kaldınız (final < 50)";
+    document.getElementById("result").style.color=getComputedStyle(document.documentElement).getPropertyValue('--progress-red');
+    const statusDiv=document.getElementById("status");
+    statusDiv.innerHTML="<div class='fail'><i class='fas fa-times-circle'></i> Maalesef kaldınız</div>";
+    document.getElementById("progressWrapper").style.opacity="0";
+    document.getElementById("progressWrapper").style.transform="translateY(20px)";
+    document.getElementById("progressWrapper").style.pointerEvents="none";
+    setTimeout(()=>{document.getElementById("progressWrapper").style.visibility="hidden"},500);
+    return;
+  }
+
+  let target=parseInt(document.getElementById("targetScore").value);
+  if(isNaN(target)||target<60)target=60;if(target>100)target=100;
+
+  let total=0, remaining=0;
+  components.forEach(([name,w],i)=>{
+    const raw=document.getElementById(`score-${i}`).value;
+    const val=parseFloat(raw);
+    const score=isNaN(val)?0:val;
+    const contrib=(score*w/100);
+    if(!isNaN(val)&&raw.trim()!=="")total+=contrib;else remaining+=w;
+  });
+
+  let need=target-total;if(need<0)need=0;
+  const neededAvg=remaining>0?(need/remaining)*100:0;
+
+  document.getElementById("result").innerHTML=
+  `✅ Şu ana kadar puan: <b>${total.toFixed(2)}</b><br>
+   🎯 Hedef not: <b>${target}</b><br>
+   ❗ Kalan puan: <b>${need.toFixed(2)}</b><br>
+   📊 Kalan tüm sınavlarda gereken ort.: <b>${neededAvg.toFixed(2)}</b>`;
+
+  // progress
+  const progress=Math.min((total/target)*100,100);
+  const bar=document.getElementById("progressBar");
+  bar.style.width=progress+"%";
+  bar.innerText=Math.floor(progress)+"%";
+  const status=document.getElementById("status");
+
+  if(total<60){
+    status.innerHTML="<div class='fail'><i class='fas fa-times-circle'></i> Maalesef kaldınız</div>";
+    bar.style.backgroundColor=getComputedStyle(document.documentElement).getPropertyValue('--progress-red');
+  }else{
+    let msg="<div class='pass'><i class='fas fa-check-circle'></i> Tebrikler, geçtiniz!</div>";
+    let color=getComputedStyle(document.documentElement).getPropertyValue('--progress-green');
+    if(target>60){
+      if(total>=target){
+        msg="<div class='pass'><i class='fas fa-check-circle'></i> Hedefi de aştın, helal!</div>";
+      }else{
+        msg="<div class='pass'><i class='fas fa-check-circle'></i> Geçtin ama hedefe ulaşamadın</div>";
+        color=getComputedStyle(document.documentElement).getPropertyValue('--progress-yellow');
+      }
+    }
+    status.innerHTML=msg;bar.style.backgroundColor=color;
+  }
+}
+
+// ——— klavye, tema, validasyon vs. ———
+function handleKey(e,i){
+  if(e.key==="Enter"){e.preventDefault();const nxt=document.getElementById(`score-${i+1}`);nxt?nxt.focus():calculate();}
+}
+function toggleDark(){
+  document.body.classList.toggle("dark");
+  document.getElementById("themeToggle").textContent=document.body.classList.contains("dark")?"Aydınlık Tema":"Karanlık Tema";
+}
+function validateRange(inp){
+  inp.value=inp.value.replace(/,/g,".").replace(/[^0-9.]/g,"");
+  const parts=inp.value.split('.');if(parts.length>2)inp.value=parts[0]+'.'+parts.slice(1).join('');
+  let v=parseFloat(inp.value);if(isNaN(v))return;if(v>100)inp.value="100";if(v<0)inp.value="0";
+}
+function validateTarget(inp){
+  inp.value=inp.value.replace(/[^0-9]/g,"");
+  let v=parseInt(inp.value);if(isNaN(v))v=60;if(v<60)v=60;if(v>100)v=100;inp.value=v;
+}
+
+window.onload=()=>{hideResultsSections();loadGrades();}
+</script>
+</body>
+</html>
